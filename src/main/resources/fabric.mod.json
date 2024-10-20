@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "animated-logo",
+  "version": "${version}",
+  "name": "Animated Mojang Logo",
+  "description": "Animates the Mojang logo in the loading screen",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/animated-logo/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "org.cyao.animatedLogo.client.AnimatedLogoClient"
+    ],
+    "main": [
+      "org.cyao.animatedLogo.AnimatedLogo"
+    ]
+  },
+  "mixins": [
+    "animated-logo.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version}"
+  }
+}
