@@ -1,27 +1,31 @@
 {
   "schemaVersion": 1,
   "id": "animated-logo",
-  "version": "${version}",
+  "version": "1.0",
   "name": "Animated Mojang Logo",
-  "description": "Animates the Mojang logo in the loading screen",
-  "authors": [],
-  "contact": {},
-  "license": "All-Rights-Reserved",
+  "authors": [
+    "Cyao (cheyao)"
+  ],
+  "contact": {
+    "homepage": "https://github.com/cheyao/animated-logo",
+    "sources": "https://github.com/cheyao/animated-logo"
+  },
+  "license": "ZLIB",
   "icon": "assets/animated-logo/icon.png",
-  "environment": "*",
+ "environment": "*",
   "entrypoints": {
-    "client": [
-      "org.cyao.animatedLogo.client.AnimatedLogoClient"
-    ],
     "main": [
-      "org.cyao.animatedLogo.AnimatedLogo"
+      "com.cyao.animatedLogo.AnimatedLogo"
     ]
   },
   "mixins": [
     "animated-logo.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "minecraft": "${minecraft_version}"
-  }
+    "fabricloader": ">=0.16.5",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "accessWidener" : "animated-logo.accesswidener"
 }
