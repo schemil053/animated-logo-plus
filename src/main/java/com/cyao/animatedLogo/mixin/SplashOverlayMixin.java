@@ -1,6 +1,5 @@
 package com.cyao.animatedLogo.mixin;
 
-import com.cyao.animatedLogo.AnimatedLogo;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.SplashOverlay;
@@ -22,11 +21,18 @@ public class SplashOverlayMixin {
     @Shadow private float progress;
     @Unique
     private int count = 0;
-    private Identifier frames[];
+    @Unique
+    private Identifier[] frames;
+    @Unique
     private boolean inited = false;
-    private static int FRAMES = 12;
-    private static int IMAGE_PER_FRAME = 4;
-    private static int FRAMES_PER_FRAME = 3;
+    @Unique
+    private static final int FRAMES = 12;
+    @Unique
+    private static final int IMAGE_PER_FRAME = 4;
+    @Unique
+    private static final int FRAMES_PER_FRAME = 3;
+    @Unique
+    private float f = 0;
 
     @ModifyArg(method = "render",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Lnet/minecraft/util/Identifier;IIIIFFIIII)V", ordinal = 0),
@@ -77,6 +83,14 @@ public class SplashOverlayMixin {
 
         context.drawTexture(this.frames[count / IMAGE_PER_FRAME / FRAMES_PER_FRAME], x - halfWidth, y - halfHeight, (int) width, (int)height,
                 0, 256 * ((count % (IMAGE_PER_FRAME * FRAMES_PER_FRAME)) / FRAMES_PER_FRAME), 1024, 256, 1024, 1024);
+
+        if (progress >= 0.8) {
+            f = Math.min(alpha, f + 0.2f);
+
+            context.setShaderColor(1.0F, 1.0F, 1.0F, f);
+            context.drawTexture(Identifier.of("animated-logo", "textures/gui/studios.png"), x - 450 / 2, y - halfHeight + 256, 450, 50,
+                    0, 0, 450, 50, 512, 512);
+        }
 
         if (progress <= 0.8 || count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
             count++;
