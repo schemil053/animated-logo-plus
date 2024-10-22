@@ -88,7 +88,7 @@ public class SplashOverlayMixin {
             f = Math.min(alpha, f + 0.2f);
 
             context.setShaderColor(1.0F, 1.0F, 1.0F, f);
-            context.drawTexture(Identifier.of("animated-logo", "textures/gui/studios.png"), x - 450 / 2, (int) (y - halfHeight + height), 450, 50,
+            context.drawTexture(Identifier.of("animated-logo", "textures/gui/studios.png"), x - halfWidth / 2, (int) (y - halfHeight + height), (int) (width / 2), (int) (height / 5),
                     0, 0, 450, 50, 512, 512);
         }
 
