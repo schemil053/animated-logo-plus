@@ -32,9 +32,11 @@ public class SplashOverlayMixin {
     @Unique
     private static final int IMAGE_PER_FRAME = 4;
     @Unique
-    private static final int FRAMES_PER_FRAME = 3;
+    private static final int FRAMES_PER_FRAME = 2;
     @Unique
     private float f = 0;
+    @Unique
+    private boolean fast = false;
 
     @ModifyArg(method = "render",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIIIIII)V", ordinal = 0),
@@ -78,6 +80,10 @@ public class SplashOverlayMixin {
 
             inited = true;
         }
+	
+	if (count == 0) {
+		fast = false;
+	}
 
         float progress = MathHelper.clamp(this.progress * 0.95F + this.reload.getProgress() * 0.050000012F, 0.0F, 1.0F);
 
@@ -95,11 +101,13 @@ public class SplashOverlayMixin {
         if (/* progress <= 0.8 || */ count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
             count++;
 
-	    /*
-            if (count >= FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) {
-                count = 0;
-            }
-	    */
+	    if (fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2)) {
+		    // Increase speed
+		    if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+			    count++;
+		    }
+		    fast = true;
+	    }
         }
     }
 }
