@@ -93,21 +93,21 @@ public class SplashOverlayMixin {
         if (progress >= 0.8) {
             f = Math.min(alpha, f + 0.2f);
 
-            context.drawTexture(RenderLayer::getGuiTextured, Identifier.of("animated-logo", "textures/gui/studios.png"), x - halfWidth / 2, (int) (y - halfHeight + height),
-                    0, 0, halfWidth, (int) (height / 5), 450, 50, 512, 512, ColorHelper.getWhite(f));
+            int sw = (int) (width*0.45);
+            context.drawTexture(RenderLayer::getGuiTextured, Identifier.of("animated-logo", "textures/gui/studios.png"), x - sw / 2, (int) (y - halfHeight + height - height/12),
+                    0, 0, sw, (int) (height / 5.0), 450, 50, 512, 512, ColorHelper.getWhite(f));
         }
 
-	// Uncomment to loop
-        if (/* progress <= 0.8 || */ count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+        if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
             count++;
 
-	    if (fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2)) {
-		    // Increase speed
-		    if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
-			    count++;
-		    }
-		    fast = true;
-	    }
+            if (fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2)) {
+                // Increase speed
+                if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+                    count++;
+                }
+                fast = true;
+            }
         }
     }
 }
