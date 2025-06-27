@@ -1,5 +1,6 @@
 package com.cyao.animatedLogo.mixin;
 
+import com.cyao.animatedLogo.AnimatedLogo;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.SplashOverlay;
@@ -16,6 +17,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 @Mixin(SplashOverlay.class)
 public class SplashOverlayMixin {
@@ -37,6 +46,8 @@ public class SplashOverlayMixin {
     private float f = 0;
     @Unique
     private boolean fast = false;
+    @Unique
+    private boolean playing = false;
 
     @ModifyArg(method = "render",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIIIIII)V", ordinal = 0),
@@ -78,6 +89,31 @@ public class SplashOverlayMixin {
                 this.frames[i] = Identifier.of("animated-logo", "textures/gui/frame_" + i + ".png");
             }
 
+            InputStream finalS = AnimatedLogo.class.getResourceAsStream("/logo.wav");
+            if(finalS != null) {
+                playing = true;
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            Clip clip = AudioSystem.getClip();
+                            AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                                    new ByteArrayInputStream(finalS.readAllBytes()));
+                            clip.open(inputStream);
+                            clip.start();
+                            while (clip.isActive()) {
+                                Thread.sleep(10);
+                            }
+                            playing = false;
+                        } catch (Exception e) {
+                        }
+                        try {
+                            finalS.close();
+                        } catch (Exception e) {
+                        }
+                    }
+                }).start();
+            }
+
             inited = true;
         }
 	
@@ -101,7 +137,7 @@ public class SplashOverlayMixin {
         if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
             count++;
 
-            if (fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2)) {
+            if (fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2) && !playing) {
                 // Increase speed
                 if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
                     count++;
