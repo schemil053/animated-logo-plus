@@ -1,6 +1,7 @@
 package com.cyao.animatedLogo.mixin;
 
 import com.cyao.animatedLogo.AnimatedLogo;
+import com.cyao.animatedLogo.util.DoneLineListen;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.SplashOverlay;
@@ -18,17 +19,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(SplashOverlay.class)
 public class SplashOverlayMixin {
     @Shadow
     @Final
     private ResourceReload reload;
+    @Shadow
+    private long reloadCompleteTime = -1L;
+    @Shadow
+    private long reloadStartTime = -1L;
     @Shadow
     private float progress;
     @Unique
@@ -48,7 +52,15 @@ public class SplashOverlayMixin {
     @Unique
     private boolean fast = false;
     @Unique
-    private boolean playing = false;
+    private AtomicBoolean playing = new AtomicBoolean(false);
+    @Unique
+    private boolean done = false;
+    @Unique
+    private boolean animDone = false;
+    @Unique
+    private long lastAdd;
+    @Unique
+    private long startTime;
 
     @ModifyArg(method = "render",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIIIIII)V", ordinal = 0),
@@ -93,7 +105,7 @@ public class SplashOverlayMixin {
 
             InputStream finalS = AnimatedLogo.class.getResourceAsStream("/logo.wav");
             if (finalS != null) {
-                playing = true;
+                playing.set(true);
                 new Thread(new Runnable() {
                     public void run() {
                         try {
@@ -101,11 +113,8 @@ public class SplashOverlayMixin {
                             AudioInputStream inputStream = AudioSystem.getAudioInputStream(
                                     new ByteArrayInputStream(finalS.readAllBytes()));
                             clip.open(inputStream);
+                            clip.addLineListener(new DoneLineListen(playing));
                             clip.start();
-                            while (clip.isActive()) {
-                                Thread.sleep(10);
-                            }
-                            playing = false;
                         } catch (Exception e) {
                         }
                         try {
@@ -117,10 +126,13 @@ public class SplashOverlayMixin {
             }
 
             inited = true;
+            startTime = System.currentTimeMillis();
         }
 
         if (count == 0) {
             fast = false;
+            done = false;
+            animDone = false;
         }
 
         float progress = MathHelper.clamp(this.progress * 0.95F + this.reload.getProgress() * 0.050000012F, 0.0F, 1.0F);
@@ -136,16 +148,37 @@ public class SplashOverlayMixin {
                     0, 0, sw, (int) (height / 5.0), 450, 50, 512, 512, ColorHelper.getWhite(f));
         }
 
-        if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
-            count++;
+//        if(lastAdd + 20 < System.currentTimeMillis()) {
+//            if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+//                count++;
+//
+//                if ((fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2)) && !playing.get()) {
+//                    // Increase speed
+//                    if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+//                        count++;
+//                    }
+//                    fast = true;
+//                }
+//            } else {
+//                animDone = true;
+//            }
+//            lastAdd = System.currentTimeMillis();
+//        }
 
-            if (fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2) && !playing) {
-                // Increase speed
-                if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
-                    count++;
-                }
-                fast = true;
-            }
+        count = Math.toIntExact((System.currentTimeMillis() - startTime) / 30);
+        if(count > FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+            count = FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1;
+            animDone = true;
+        }
+
+        if(progress > 0.9f) {
+            done = true;
+        }
+
+        if(done && !animDone) {
+            this.progress = 0.9f;
+            this.reloadCompleteTime = -1L;
+            this.reloadStartTime = -1L;
         }
     }
 }
