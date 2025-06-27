@@ -35,6 +35,7 @@ public class SplashOverlayMixin {
     private long reloadStartTime = -1L;
     @Shadow
     private float progress;
+    @Shadow @Final private boolean reloading;
     @Unique
     private int count = 0;
     @Unique
@@ -96,6 +97,9 @@ public class SplashOverlayMixin {
     )
     private void onAfterRenderLogo(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci,
                                    @Local(ordinal = 2) int scaledWidth, @Local(ordinal = 3) int scaledHeight, @Local(ordinal = 3) float alpha, @Local(ordinal = 4) int x, @Local(ordinal = 5) int y, @Local(ordinal = 0) double height, @Local(ordinal = 6) int halfHeight, @Local(ordinal = 1) double width, @Local(ordinal = 7) int halfWidth) {
+        if(reloading) {
+            return;
+        }
         if (!inited) {
             this.frames = new Identifier[FRAMES];
 
