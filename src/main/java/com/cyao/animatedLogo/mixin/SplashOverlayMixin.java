@@ -22,14 +22,15 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 @Mixin(SplashOverlay.class)
 public class SplashOverlayMixin {
-    @Shadow @Final private ResourceReload reload;
-    @Shadow private float progress;
+    @Shadow
+    @Final
+    private ResourceReload reload;
+    @Shadow
+    private float progress;
     @Unique
     private int count = 0;
     @Unique
@@ -56,6 +57,7 @@ public class SplashOverlayMixin {
     private int removeText1(int i) {
         return 0;
     }
+
     @ModifyArg(method = "render",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIFFIIIIIII)V", ordinal = 1),
             index = 7
@@ -90,7 +92,7 @@ public class SplashOverlayMixin {
             }
 
             InputStream finalS = AnimatedLogo.class.getResourceAsStream("/logo.wav");
-            if(finalS != null) {
+            if (finalS != null) {
                 playing = true;
                 new Thread(new Runnable() {
                     public void run() {
@@ -116,21 +118,21 @@ public class SplashOverlayMixin {
 
             inited = true;
         }
-	
-	if (count == 0) {
-		fast = false;
-	}
+
+        if (count == 0) {
+            fast = false;
+        }
 
         float progress = MathHelper.clamp(this.progress * 0.95F + this.reload.getProgress() * 0.050000012F, 0.0F, 1.0F);
 
         context.drawTexture(RenderLayer::getGuiTextured, this.frames[count / IMAGE_PER_FRAME / FRAMES_PER_FRAME], x - halfWidth, y - halfHeight,
-                0, 256 * ((count % (IMAGE_PER_FRAME * FRAMES_PER_FRAME)) / FRAMES_PER_FRAME), (int) width, (int)height, 1024, 256, 1024, 1024, ColorHelper.getWhite(alpha));
+                0, 256 * ((count % (IMAGE_PER_FRAME * FRAMES_PER_FRAME)) / FRAMES_PER_FRAME), (int) width, (int) height, 1024, 256, 1024, 1024, ColorHelper.getWhite(alpha));
 
         if (progress >= 0.8) {
             f = Math.min(alpha, f + 0.2f);
 
-            int sw = (int) (width*0.45);
-            context.drawTexture(RenderLayer::getGuiTextured, Identifier.of("animated-logo", "textures/gui/studios.png"), x - sw / 2, (int) (y - halfHeight + height - height/12),
+            int sw = (int) (width * 0.45);
+            context.drawTexture(RenderLayer::getGuiTextured, Identifier.of("animated-logo", "textures/gui/studios.png"), x - sw / 2, (int) (y - halfHeight + height - height / 12),
                     0, 0, sw, (int) (height / 5.0), 450, 50, 512, 512, ColorHelper.getWhite(f));
         }
 
