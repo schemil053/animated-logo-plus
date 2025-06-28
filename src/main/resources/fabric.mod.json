@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "animated-logo",
+  "id": "animated-logo-plus",
   "version": "1.3",
-  "name": "Animated Mojang Logo",
+  "name": "Animated Mojang Logo Plus",
   "authors": [
-    "Cyao (cheyao)"
+    "Cyao (cheyao)",
+    "schemil053"
   ],
   "contact": {
     "homepage": "https://github.com/cheyao/animated-logo",
