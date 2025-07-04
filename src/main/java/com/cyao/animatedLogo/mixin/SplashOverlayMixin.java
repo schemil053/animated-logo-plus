@@ -50,16 +50,14 @@ public class SplashOverlayMixin {
     private static final int FRAMES_PER_FRAME = 2;
     @Unique
     private float f = 0;
-//    @Unique
-//    private boolean fast = false;
     @Unique
-    private AtomicBoolean playing = new AtomicBoolean(false);
+    private boolean fast = false;
+    @Unique
+    private final AtomicBoolean playing = new AtomicBoolean(false);
     @Unique
     private boolean done = false;
     @Unique
     private boolean animDone = false;
-//    @Unique
-//    private long lastAdd;
     @Unique
     private long startTime;
 
@@ -97,9 +95,6 @@ public class SplashOverlayMixin {
     )
     private void onAfterRenderLogo(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci,
                                    @Local(ordinal = 2) int scaledWidth, @Local(ordinal = 3) int scaledHeight, @Local(ordinal = 3) float alpha, @Local(ordinal = 4) int x, @Local(ordinal = 5) int y, @Local(ordinal = 0) double height, @Local(ordinal = 6) int halfHeight, @Local(ordinal = 1) double width, @Local(ordinal = 7) int halfWidth) {
-        if(reloading) {
-            return;
-        }
         if (!inited) {
             this.frames = new Identifier[FRAMES];
 
@@ -107,26 +102,28 @@ public class SplashOverlayMixin {
                 this.frames[i] = Identifier.of("animated-logo", "textures/gui/frame_" + i + ".png");
             }
 
-            InputStream finalS = AnimatedLogo.class.getResourceAsStream("/logo.wav");
-            if (finalS != null) {
-                playing.set(true);
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            Clip clip = AudioSystem.getClip();
-                            AudioInputStream inputStream = AudioSystem.getAudioInputStream(
-                                    new ByteArrayInputStream(finalS.readAllBytes()));
-                            clip.open(inputStream);
-                            clip.addLineListener(new DoneLineListen(playing));
-                            clip.start();
-                        } catch (Exception e) {
+            if(!reloading) {
+                InputStream finalS = AnimatedLogo.class.getResourceAsStream("/logo.wav");
+                if (finalS != null) {
+                    playing.set(true);
+                    new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                Clip clip = AudioSystem.getClip();
+                                AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                                        new ByteArrayInputStream(finalS.readAllBytes()));
+                                clip.open(inputStream);
+                                clip.addLineListener(new DoneLineListen(playing));
+                                clip.start();
+                            } catch (Exception e) {
+                            }
+                            try {
+                                finalS.close();
+                            } catch (Exception e) {
+                            }
                         }
-                        try {
-                            finalS.close();
-                        } catch (Exception e) {
-                        }
-                    }
-                }).start();
+                    }).start();
+                }
             }
 
             inited = true;
@@ -134,7 +131,7 @@ public class SplashOverlayMixin {
         }
 
         if (count == 0) {
-//            fast = false;
+            fast = false;
             done = false;
             animDone = false;
         }
@@ -152,37 +149,36 @@ public class SplashOverlayMixin {
                     0, 0, sw, (int) (height / 5.0), 450, 50, 512, 512, ColorHelper.getWhite(f));
         }
 
-//        if(lastAdd + 20 < System.currentTimeMillis()) {
-//            if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
-//                count++;
-//
-//                if ((fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2)) && !playing.get()) {
-//                    // Increase speed
-//                    if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
-//                        count++;
-//                    }
-//                    fast = true;
-//                }
-//            } else {
-//                animDone = true;
-//            }
-//            lastAdd = System.currentTimeMillis();
-//        }
+        if(reloading) {
+            if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+                count++;
 
-        count = Math.toIntExact((System.currentTimeMillis() - startTime) / 30);
-        if(count > FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
-            count = FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1;
-            animDone = true;
-        }
+                if ((fast || (progress >= 0.6 && count < (FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME) / 2))) {
+                    // Increase speed
+                    if (count != FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+                        count++;
+                    }
+                    fast = true;
+                }
+            } else {
+                animDone = true;
+            }
+        } else {
+            count = Math.toIntExact((System.currentTimeMillis() - startTime) / 30);
+            if (count > FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1) {
+                count = FRAMES * IMAGE_PER_FRAME * FRAMES_PER_FRAME - 1;
+                animDone = true;
+            }
 
-        if(progress > 0.9f) {
-            done = true;
-        }
+            if (progress > 0.9f) {
+                done = true;
+            }
 
-        if(done && !animDone) {
-            this.progress = 0.9f;
-            this.reloadCompleteTime = -1L;
-            this.reloadStartTime = -1L;
+            if (done && !animDone) {
+                this.progress = 0.9f;
+                this.reloadCompleteTime = -1L;
+                this.reloadStartTime = -1L;
+            }
         }
     }
 }
