@@ -15,7 +15,6 @@ public class DoneLineListen implements LineListener {
     public void update(LineEvent event) {
         if(event.getType() == LineEvent.Type.STOP) {
             playing.set(false);
-            System.out.println("Done! Sis");
         }
     }
 }
