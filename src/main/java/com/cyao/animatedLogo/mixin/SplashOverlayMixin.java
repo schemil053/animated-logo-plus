@@ -50,16 +50,16 @@ public class SplashOverlayMixin {
     private static final int FRAMES_PER_FRAME = 2;
     @Unique
     private float f = 0;
-    @Unique
-    private boolean fast = false;
+//    @Unique
+//    private boolean fast = false;
     @Unique
     private AtomicBoolean playing = new AtomicBoolean(false);
     @Unique
     private boolean done = false;
     @Unique
     private boolean animDone = false;
-    @Unique
-    private long lastAdd;
+//    @Unique
+//    private long lastAdd;
     @Unique
     private long startTime;
 
@@ -134,7 +134,7 @@ public class SplashOverlayMixin {
         }
 
         if (count == 0) {
-            fast = false;
+//            fast = false;
             done = false;
             animDone = false;
         }
